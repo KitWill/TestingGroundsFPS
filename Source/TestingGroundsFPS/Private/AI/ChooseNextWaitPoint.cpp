@@ -2,7 +2,7 @@
 
 #include "Public/AI/ChooseNextWaitPoint.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Public/PatrollingGurad.h"
+#include "Public/PatrolRoute.h"
 #include "Runtime/AIModule/Classes/AIController.h "
 
 
@@ -11,8 +11,16 @@ EBTNodeResult::Type UChooseNextWaitPoint::ExecuteTask(UBehaviorTreeComponent& Ow
 {
 	auto AIController = OwnerComp.GetAIOwner();
 	auto ControlledPawn = AIController->GetPawn();
-	APatrollingGurad *PatrollingGurad = Cast<APatrollingGurad>(ControlledPawn);
-	auto PatorlPoints = PatrollingGurad->PatrolPointCPP;
+	auto PatrolRoute = ControlledPawn->FindComponentByClass<UPatrolRoute>();
+	if (!ensure(PatrolRoute)) return EBTNodeResult::Failed;
+
+	auto PatorlPoints = PatrolRoute->GetPatrolPointCPP();
+
+	if (PatorlPoints.Num() == 0) 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Missing Patrol Piont"));
+		return EBTNodeResult::Failed;
+	}
 
 	auto Blackboard = OwnerComp.GetBlackboardComponent();
 	auto Index = Blackboard->GetValueAsInt(IndexKey.SelectedKeyName);
