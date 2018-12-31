@@ -16,6 +16,7 @@ class TESTINGGROUNDSFPS_API AGun : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AGun();
+	class UAnimInstance* AnimInstance;
 
 protected:
 	// Called when the game starts or when spawned
@@ -40,15 +41,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 		class UAnimMontage* FireAnimation;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-		class UAnimInstance* AnimInstance;
-
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-protected:
 	/** Fires a projectile. */
 	void OnFire();
+
+protected:
+
 	
 };

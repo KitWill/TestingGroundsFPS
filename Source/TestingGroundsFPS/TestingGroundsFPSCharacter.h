@@ -65,6 +65,8 @@ public:
 
 	AGun *Gun;
 
+	class UInputComponent* InputComponent;
+
 protected:
 
 	/** Resets HMD orientation and position in VR. */
