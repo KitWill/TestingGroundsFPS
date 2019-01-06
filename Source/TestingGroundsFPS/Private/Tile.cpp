@@ -12,19 +12,17 @@ ATile::ATile()
 
 }
 
-void ATile::PlaceActor(TSubclassOf<AActor> ToSpawn,int MinSpawn,int MaxSpawn)
-{
-	FVector Min(0,-2000,0);
-	FVector Max(4000, 2000, 0);
-	FBox Bounds(Min, Max);
-	
+void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn,int MinSpawn,int MaxSpawn,float Radius)
+{	
 	int NumberToSpawn = FMath::RandRange(MinSpawn, MaxSpawn);
 	for (int i = 0; i < NumberToSpawn; i++)
 	{
-		FVector SpawnPoint = FMath::RandPointInBox(Bounds);
-		AActor* Spawned = GetWorld()->SpawnActor<AActor>(ToSpawn);
-		Spawned->SetActorRelativeLocation(SpawnPoint);
-		Spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative,false));
+		FVector SpawnPoint;
+		bool found = FindEmptyLocation(Radius, SpawnPoint);
+		if (found)
+		{
+			PlaceActor(ToSpawn, SpawnPoint);
+		}
 	}
 }
 
@@ -42,12 +40,39 @@ void ATile::Tick(float DeltaTime)
 
 }
 
-bool ATile::CastSphere(FVector Location, float Radius)
+bool ATile::CanSpawnAtLocation(FVector Location, float Radius)
 {
 	FHitResult HitResult;
-	bool HasHit = GetWorld()->SweepSingleByChannel(HitResult, Location, Location, FQuat::Identity, ECollisionChannel::ECC_GameTraceChannel2, FCollisionShape::MakeSphere(Radius));
+	FVector GlobalLocation = ActorToWorld().TransformPosition(Location); //本地坐标转换为世界坐标
+	bool HasHit = GetWorld()->SweepSingleByChannel(HitResult, GlobalLocation, GlobalLocation, FQuat::Identity, ECollisionChannel::ECC_GameTraceChannel2, FCollisionShape::MakeSphere(Radius));
 	FColor ResultColor = HasHit ? FColor::Red : FColor::Green;
-	DrawDebugCapsule(GetWorld(), Location, 0, Radius, FQuat::Identity, ResultColor);
-	return HasHit;
+	DrawDebugCapsule(GetWorld(), GlobalLocation, 0, Radius, FQuat::Identity, ResultColor);
+	return !HasHit;
+}
+
+bool ATile::FindEmptyLocation(float Radius, FVector& OutLocation)
+{
+	FVector Min(0,-2000,0);
+	FVector Max(4000, 2000, 0);
+	FBox Bounds(Min, Max);
+	const int MAX_ATTEMPS = 100;
+	for (size_t i = 0; i < MAX_ATTEMPS; i++)
+	{
+		FVector CandidatePoint = FMath::RandPointInBox(Bounds);
+		if (CanSpawnAtLocation(CandidatePoint,Radius))
+		{
+			OutLocation = CandidatePoint;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void ATile::PlaceActor(TSubclassOf<AActor> ToSpawn, FVector SpawnPoint)
+{
+	AActor* Spawned = GetWorld()->SpawnActor<AActor>(ToSpawn);
+	Spawned->SetActorRelativeLocation(SpawnPoint);
+	Spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, false)); 
 }
 
