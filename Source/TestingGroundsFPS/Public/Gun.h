@@ -16,7 +16,8 @@ class TESTINGGROUNDSFPS_API AGun : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AGun();
-	class UAnimInstance* AnimInstance;
+	class UAnimInstance* AnimInstance1P;
+	class UAnimInstance* AnimInstance3P;
 
 protected:
 	// Called when the game starts or when spawned
@@ -39,7 +40,9 @@ protected:
 
 	/** AnimMontage to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-		class UAnimMontage* FireAnimation;
+		class UAnimMontage* FireAnimation1P;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+		class UAnimMontage* FireAnimation3P;
 
 public:	
 	// Called every frame
