@@ -32,7 +32,6 @@ void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn,int MinSpawn,int MaxSpawn,fl
 void ATile::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
