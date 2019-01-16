@@ -5,6 +5,7 @@
 #include "DrawDebugHelpers.h "
 #include "ActorPool.h"
 #include "AI/Navigation/NavigationSystem.h"
+
 // Sets default values
 ATile::ATile()
 {
@@ -34,18 +35,29 @@ void ATile::PositionNavMeshBoundsVolume()
 
 void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn,int MinSpawn,int MaxSpawn,float Radius, float MinScale, float MaxScale )
 {	
+	TArray<FSpawnPosition> SpawnPositions = RandomSpawnPositions(MinSpawn, MaxSpawn, Radius, MinScale, MaxScale);
+	for (FSpawnPosition SpawnPosition:SpawnPositions)
+	{
+		PlaceActor(ToSpawn, SpawnPosition);
+	}
+}
+
+TArray<FSpawnPosition> ATile::RandomSpawnPositions(int MinSpawn, int MaxSpawn, float Radius, float MinScale, float MaxScale)
+{
+	TArray<FSpawnPosition> SpawnPositions;
 	int NumberToSpawn = FMath::RandRange(MinSpawn, MaxSpawn);
 	for (int i = 0; i < NumberToSpawn; i++)
 	{
-		FVector SpawnPoint;
-		float RandomScale = FMath::RandRange(MinScale, MaxScale);
-		bool found = FindEmptyLocation(Radius*RandomScale, SpawnPoint);
+		FSpawnPosition SpawnPosition;
+		SpawnPosition.Scale = FMath::RandRange(MinScale, MaxScale);
+		bool found = FindEmptyLocation(Radius*SpawnPosition.Scale, SpawnPosition.Location);
 		if (found)
 		{
-			float Ratation = FMath::RandRange(-180.0f, 180.0f);
-			PlaceActor(ToSpawn, SpawnPoint, Ratation, RandomScale);
+			SpawnPosition.Rotation = FMath::RandRange(-180.0f, 180.0f);
+			SpawnPositions.Add(SpawnPosition);
 		}
 	}
+	return SpawnPositions;
 }
 
 // Called when the game starts or when spawned
@@ -92,12 +104,12 @@ bool ATile::FindEmptyLocation(float Radius, FVector& OutLocation)
 	return false;
 }
 
-void ATile::PlaceActor(TSubclassOf<AActor> ToSpawn, FVector SpawnPoint,float Rotation, float Scale)
+void ATile::PlaceActor(TSubclassOf<AActor> ToSpawn, FSpawnPosition SpawnPosition)
 {
 	AActor* Spawned = GetWorld()->SpawnActor<AActor>(ToSpawn);
-	Spawned->SetActorRelativeLocation(SpawnPoint);
-	Spawned->SetActorRotation(FRotator(0, Rotation, 0));
-	Spawned->SetActorScale3D(FVector(Scale));
+	Spawned->SetActorRelativeLocation(SpawnPosition.Location);
+	Spawned->SetActorRotation(FRotator(0, SpawnPosition.Rotation, 0));
+	Spawned->SetActorScale3D(FVector(SpawnPosition.Scale));
 	Spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, false)); 
 }
 
