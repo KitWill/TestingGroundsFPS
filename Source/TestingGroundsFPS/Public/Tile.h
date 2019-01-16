@@ -30,6 +30,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Spawn")
 	void PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn, float Radius, float MinScale, float MaxScale);
+	UFUNCTION(BlueprintCallable, Category = "Spawn")
+	void PlaceAIPawns(TSubclassOf<APawn> ToSpawn, int MinSpawn, int MaxSpawn, float Radius);
 
 protected:
 	// Called when the game starts or when spawned
@@ -58,6 +60,7 @@ private:
 
 	bool FindEmptyLocation(float Radius,FVector& OutLocation);
 	void PlaceActor(TSubclassOf<AActor> ToSpawn,FSpawnPosition SpawnPosition);
+	void PlaceAIPawn(TSubclassOf<APawn> ToSpawn, FSpawnPosition SpawnPosition);
 
 	void PositionNavMeshBoundsVolume();
 	UActorPool *Pool;
